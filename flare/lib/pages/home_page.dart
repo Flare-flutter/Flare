@@ -2,30 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flare/services/auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'dart:async';
-
-// I dont care about this file, it was just the post-login page for the firebase tutorial
-class Todo {
-  String key;
-  String subject;
-  bool completed;
-  String userId;
-
-  Todo(this.subject, this.userId, this.completed);
-
-  Todo.fromSnapshot(DataSnapshot snapshot)
-      : key = snapshot.key,
-        userId = snapshot.value["userId"],
-        subject = snapshot.value["subject"],
-        completed = snapshot.value["completed"];
-
-  toJson() {
-    return {
-      "userId": userId,
-      "subject": subject,
-      "completed": completed,
-    };
-  }
-}
+import 'package:rxdart/rxdart.dart';
+import 'package:sensors/sensors.dart';
 
 class HomePage extends StatefulWidget {
   HomePage({Key key, this.auth, this.userId, this.logoutCallback}) : super(key: key);
@@ -33,119 +11,52 @@ class HomePage extends StatefulWidget {
   final BaseAuth auth;
   final VoidCallback logoutCallback;
   final String userId;
-
+  BehaviorSubject<AccelerometerEvent> _accelerometerStream;
   @override
   State<StatefulWidget> createState() => new _HomePageState();
 }
 
+class sensorUI extends StatelessWidget {
+  final accelStream;
+  const sensorUI({Key key, this.accelStream}) : super(key: key);
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder(
+        stream: accelStream,
+        builder: (context, AsyncSnapshot<AccelerometerEvent> snapshot) {
+          if (snapshot.hasData) {
+            return Container(
+              alignment: Alignment.center,
+              child: Stack(
+                children: <Widget>[
+                  Text("X: " + snapshot.data.x.toString()),
+                  Text("Y: " + snapshot.data.y.toString()),
+                  Text("Z: " + snapshot.data.z.toString()),
+                ],
+              ),
+            );
+          } else if (snapshot.hasError) {
+            print("Error in weather_panel.dart -> weatherLabel, stream has error");
+            return Text("Error");
+          } else {
+            return Text("--");
+          }
+        });
+  }
+}
+
 class _HomePageState extends State<HomePage> {
-  List<Todo> _todoList;
+  //List<Todo> _todoList;
 
   final FirebaseDatabase _database = FirebaseDatabase.instance;
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
 
-  final _textEditingController = TextEditingController();
-  StreamSubscription<Event> _onTodoAddedSubscription;
-  StreamSubscription<Event> _onTodoChangedSubscription;
-
-  Query _todoQuery;
-
-  //bool _isEmailVerified = false;
-
   @override
   void initState() {
     super.initState();
+    super.widget._accelerometerStream = BehaviorSubject();
 
-    //_checkEmailVerification();
-
-    _todoList = new List();
-    _todoQuery = _database.reference().child("todo").orderByChild("userId").equalTo(widget.userId);
-    _onTodoAddedSubscription = _todoQuery.onChildAdded.listen(onEntryAdded);
-    _onTodoChangedSubscription = _todoQuery.onChildChanged.listen(onEntryChanged);
-  }
-
-//  void _checkEmailVerification() async {
-//    _isEmailVerified = await widget.auth.isEmailVerified();
-//    if (!_isEmailVerified) {
-//      _showVerifyEmailDialog();
-//    }
-//  }
-
-//  void _resentVerifyEmail(){
-//    widget.auth.sendEmailVerification();
-//    _showVerifyEmailSentDialog();
-//  }
-
-//  void _showVerifyEmailDialog() {
-//    showDialog(
-//      context: context,
-//      builder: (BuildContext context) {
-//        // return object of type Dialog
-//        return AlertDialog(
-//          title: new Text("Verify your account"),
-//          content: new Text("Please verify account in the link sent to email"),
-//          actions: <Widget>[
-//            new FlatButton(
-//              child: new Text("Resent link"),
-//              onPressed: () {
-//                Navigator.of(context).pop();
-//                _resentVerifyEmail();
-//              },
-//            ),
-//            new FlatButton(
-//              child: new Text("Dismiss"),
-//              onPressed: () {
-//                Navigator.of(context).pop();
-//              },
-//            ),
-//          ],
-//        );
-//      },
-//    );
-//  }
-
-//  void _showVerifyEmailSentDialog() {
-//    showDialog(
-//      context: context,
-//      builder: (BuildContext context) {
-//        // return object of type Dialog
-//        return AlertDialog(
-//          title: new Text("Verify your account"),
-//          content: new Text("Link to verify account has been sent to your email"),
-//          actions: <Widget>[
-//            new FlatButton(
-//              child: new Text("Dismiss"),
-//              onPressed: () {
-//                Navigator.of(context).pop();
-//              },
-//            ),
-//          ],
-//        );
-//      },
-//    );
-//  }
-
-  @override
-  void dispose() {
-    _onTodoAddedSubscription.cancel();
-    _onTodoChangedSubscription.cancel();
-    super.dispose();
-  }
-
-  onEntryChanged(Event event) {
-    var oldEntry = _todoList.singleWhere((entry) {
-      return entry.key == event.snapshot.key;
-    });
-
-    setState(() {
-      _todoList[_todoList.indexOf(oldEntry)] = Todo.fromSnapshot(event.snapshot);
-    });
-  }
-
-  onEntryAdded(Event event) {
-    setState(() {
-      _todoList.add(Todo.fromSnapshot(event.snapshot));
-    });
+    super.widget._accelerometerStream.addStream(accelerometerEvents.map((AccelerometerEvent ae) => ae));
   }
 
   signOut() async {
@@ -157,124 +68,14 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  addNewTodo(String todoItem) {
-    if (todoItem.length > 0) {
-      Todo todo = new Todo(todoItem.toString(), widget.userId, false);
-      _database.reference().child("todo").push().set(todo.toJson());
-    }
-  }
-
-  updateTodo(Todo todo) {
-    //Toggle completed
-    todo.completed = !todo.completed;
-    if (todo != null) {
-      _database.reference().child("todo").child(todo.key).set(todo.toJson());
-    }
-  }
-
-  deleteTodo(String todoId, int index) {
-    _database.reference().child("todo").child(todoId).remove().then((_) {
-      print("Delete $todoId successful");
-      setState(() {
-        _todoList.removeAt(index);
-      });
-    });
-  }
-
-  showAddTodoDialog(BuildContext context) async {
-    _textEditingController.clear();
-    await showDialog<String>(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            content: new Row(
-              children: <Widget>[
-                new Expanded(
-                    child: new TextField(
-                  controller: _textEditingController,
-                  autofocus: true,
-                  decoration: new InputDecoration(
-                    labelText: 'Add new todo',
-                  ),
-                ))
-              ],
-            ),
-            actions: <Widget>[
-              new FlatButton(
-                  child: const Text('Cancel'),
-                  onPressed: () {
-                    Navigator.pop(context);
-                  }),
-              new FlatButton(
-                  child: const Text('Save'),
-                  onPressed: () {
-                    addNewTodo(_textEditingController.text.toString());
-                    Navigator.pop(context);
-                  })
-            ],
-          );
-        });
-  }
-
-  Widget showTodoList() {
-    if (_todoList.length > 0) {
-      return ListView.builder(
-          shrinkWrap: true,
-          itemCount: _todoList.length,
-          itemBuilder: (BuildContext context, int index) {
-            String todoId = _todoList[index].key;
-            String subject = _todoList[index].subject;
-            bool completed = _todoList[index].completed;
-            String userId = _todoList[index].userId;
-            return Dismissible(
-              key: Key(todoId),
-              background: Container(color: Colors.red),
-              onDismissed: (direction) async {
-                deleteTodo(todoId, index);
-              },
-              child: ListTile(
-                title: Text(
-                  subject,
-                  style: TextStyle(fontSize: 20.0),
-                ),
-                trailing: IconButton(
-                    icon: (completed)
-                        ? Icon(
-                            Icons.done_outline,
-                            color: Colors.green,
-                            size: 20.0,
-                          )
-                        : Icon(Icons.done, color: Colors.grey, size: 20.0),
-                    onPressed: () {
-                      updateTodo(_todoList[index]);
-                    }),
-              ),
-            );
-          });
-    } else {
-      return Center(
-          child: Text(
-        "I dont care about this file, it was just the post-login page for the firebase tutorial. It's a todo list",
-        textAlign: TextAlign.center,
-        style: TextStyle(fontSize: 30.0),
-      ));
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
-        appBar: new AppBar(
-          title: new Text('Flutter login demo'),
-          actions: <Widget>[new FlatButton(child: new Text('Logout', style: new TextStyle(fontSize: 17.0, color: Colors.white)), onPressed: signOut)],
-        ),
-        body: showTodoList(),
-        floatingActionButton: FloatingActionButton(
-          onPressed: () {
-            showAddTodoDialog(context);
-          },
-          tooltip: 'Increment',
-          child: Icon(Icons.add),
-        ));
+      appBar: new AppBar(
+        title: new Text('Flare'),
+        actions: <Widget>[new FlatButton(child: new Text('Logout', style: new TextStyle(fontSize: 17.0, color: Colors.white)), onPressed: signOut)],
+      ),
+      body: sensorUI(accelStream: widget._accelerometerStream),
+    );
   }
 }
