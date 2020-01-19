@@ -1,6 +1,10 @@
 import 'package:flare/core/entities/ride_status_provider.dart';
 import 'package:flare/features/authentication/domain/repositories/authenticationService.dart';
 import 'package:flare/features/status_detail/presentation/status_detail_page.dart';
+<<<<<<< HEAD
+=======
+import 'package:flare/features/user_search/presentation/widgets/user_search.dart';
+>>>>>>> 58455041fec648d71628ed0995e19294b99d7297
 import 'package:flutter/material.dart';
 // import 'package:flare/services/auth.dart';
 import 'package:firebase_database/firebase_database.dart';
@@ -9,7 +13,8 @@ import 'package:rxdart/rxdart.dart';
 import 'package:sensors/sensors.dart';
 
 class HomePage extends StatefulWidget {
-  HomePage({Key key, this.auth, this.userId, this.logoutCallback}) : super(key: key);
+  HomePage({Key key, this.auth, this.userId, this.logoutCallback})
+      : super(key: key);
 
   final AuthService auth;
   final VoidCallback logoutCallback;
@@ -39,14 +44,16 @@ class SensorUI extends StatelessWidget {
                   RaisedButton(onPressed: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => StatusDetailPage()),
+                      MaterialPageRoute(
+                          builder: (context) => StatusDetailPage()),
                     );
                   })
                 ],
               ),
             );
           } else if (snapshot.hasError) {
-            print("Error in weather_panel.dart -> weatherLabel, stream has error");
+            print(
+                "Error in weather_panel.dart -> weatherLabel, stream has error");
             return Text("Error");
           } else {
             return Text("--");
