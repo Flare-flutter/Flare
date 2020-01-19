@@ -30,9 +30,10 @@ class TimeWidget extends StatelessWidget {
         stream: time_stream,
         builder: (context, AsyncSnapshot<DateTime> snapshot) {
           // print("getting time " + snapshot.data.toIso8601String());
-          print("getting status " + snapshot.data.toIso8601String());
-          DateTime currentTime = snapshot.data;
+          //  print("getting status " + snapshot.data.toIso8601String());
+
           if (snapshot.hasData) {
+            DateTime currentTime = snapshot.data;
             return Container(
                 alignment: Alignment.center,
                 child: Column(children: <Widget>[
@@ -46,7 +47,7 @@ class TimeWidget extends StatelessWidget {
             print("Error in time widget");
             return Text("Error");
           } else {
-            return Text("--");
+            return Text("");
           }
         });
   }
