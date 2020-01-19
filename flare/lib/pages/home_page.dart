@@ -1,4 +1,5 @@
 import 'package:flare/features/authentication/domain/repositories/authenticationService.dart';
+import 'package:flare/features/user_search/presentation/widgets/user_search.dart';
 import 'package:flutter/material.dart';
 // import 'package:flare/services/auth.dart';
 import 'package:firebase_database/firebase_database.dart';
@@ -18,9 +19,9 @@ class HomePage extends StatefulWidget {
   State<StatefulWidget> createState() => new _HomePageState();
 }
 
-class sensorUI extends StatelessWidget {
+class SensorUI extends StatelessWidget {
   final accelStream;
-  const sensorUI({Key key, this.accelStream}) : super(key: key);
+  SensorUI({Key key, this.accelStream}) : super(key: key);
   @override
   Widget build(BuildContext context) {
     return StreamBuilder(
@@ -79,14 +80,9 @@ class _HomePageState extends State<HomePage> {
     return new Scaffold(
       appBar: new AppBar(
         title: new Text('Flare'),
-        actions: <Widget>[
-          new FlatButton(
-              child: new Text('Logout',
-                  style: new TextStyle(fontSize: 17.0, color: Colors.white)),
-              onPressed: signOut)
-        ],
+        actions: <Widget>[UserSearchButton()],
       ),
-      body: sensorUI(accelStream: widget._accelerometerStream),
+      body: SensorUI(accelStream: widget._accelerometerStream),
     );
   }
 }

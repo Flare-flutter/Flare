@@ -32,6 +32,7 @@ dependencies:
   equatable: ^1.0.1
   # Functional programming thingies
   dartz: ^0.8.9
+  get_it: ^3.1.0
 
 dev_dependencies:
   flutter_test:
