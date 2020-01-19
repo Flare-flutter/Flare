@@ -1,9 +1,8 @@
 import 'package:flare/features/authentication/domain/repositories/authenticationService.dart';
 import 'package:flutter/material.dart';
-// import 'package:flare/services/auth.dart';
 
 class LoginPage extends StatefulWidget {
-  LoginPage({this.auth, this.loginCallback});
+  LoginPage({@required this.auth, this.loginCallback});
 
   final AuthService auth;
   final VoidCallback loginCallback;

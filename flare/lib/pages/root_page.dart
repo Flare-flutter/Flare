@@ -1,6 +1,7 @@
+import 'package:flare/features/authentication/domain/repositories/authenticationService.dart';
 import 'package:flutter/material.dart';
 import 'package:flare/pages/login_page.dart';
-import 'package:flare/services/auth.dart';
+// import 'package:flare/services/auth.dart';
 import 'package:flare/pages/home_page.dart';
 
 enum AuthStatus {
@@ -12,7 +13,7 @@ enum AuthStatus {
 class RootPage extends StatefulWidget {
   RootPage({this.auth});
 
-  final BaseAuth auth;
+  final AuthService auth;
 
   @override
   State<StatefulWidget> createState() => new _RootPageState();
@@ -30,7 +31,8 @@ class _RootPageState extends State<RootPage> {
         if (user != null) {
           _userId = user?.uid;
         }
-        authStatus = user?.uid == null ? AuthStatus.NOT_LOGGED_IN : AuthStatus.LOGGED_IN;
+        authStatus =
+            user?.uid == null ? AuthStatus.NOT_LOGGED_IN : AuthStatus.LOGGED_IN;
       });
     });
     print("ROOT INIT");

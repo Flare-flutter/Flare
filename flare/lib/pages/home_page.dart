@@ -1,14 +1,16 @@
+import 'package:flare/features/authentication/domain/repositories/authenticationService.dart';
 import 'package:flutter/material.dart';
-import 'package:flare/services/auth.dart';
+// import 'package:flare/services/auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'dart:async';
 import 'package:rxdart/rxdart.dart';
 import 'package:sensors/sensors.dart';
 
 class HomePage extends StatefulWidget {
-  HomePage({Key key, this.auth, this.userId, this.logoutCallback}) : super(key: key);
+  HomePage({Key key, this.auth, this.userId, this.logoutCallback})
+      : super(key: key);
 
-  final BaseAuth auth;
+  final AuthService auth;
   final VoidCallback logoutCallback;
   final String userId;
   BehaviorSubject<AccelerometerEvent> _accelerometerStream;
@@ -36,7 +38,8 @@ class sensorUI extends StatelessWidget {
               ),
             );
           } else if (snapshot.hasError) {
-            print("Error in weather_panel.dart -> weatherLabel, stream has error");
+            print(
+                "Error in weather_panel.dart -> weatherLabel, stream has error");
             return Text("Error");
           } else {
             return Text("--");
@@ -56,7 +59,10 @@ class _HomePageState extends State<HomePage> {
     super.initState();
     super.widget._accelerometerStream = BehaviorSubject();
 
-    super.widget._accelerometerStream.addStream(accelerometerEvents.map((AccelerometerEvent ae) => ae));
+    super
+        .widget
+        ._accelerometerStream
+        .addStream(accelerometerEvents.map((AccelerometerEvent ae) => ae));
   }
 
   signOut() async {
@@ -73,7 +79,12 @@ class _HomePageState extends State<HomePage> {
     return new Scaffold(
       appBar: new AppBar(
         title: new Text('Flare'),
-        actions: <Widget>[new FlatButton(child: new Text('Logout', style: new TextStyle(fontSize: 17.0, color: Colors.white)), onPressed: signOut)],
+        actions: <Widget>[
+          new FlatButton(
+              child: new Text('Logout',
+                  style: new TextStyle(fontSize: 17.0, color: Colors.white)),
+              onPressed: signOut)
+        ],
       ),
       body: sensorUI(accelStream: widget._accelerometerStream),
     );
