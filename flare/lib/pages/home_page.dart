@@ -1,6 +1,10 @@
 import 'package:flare/core/entities/ride_status_provider.dart';
 import 'package:flare/features/authentication/domain/repositories/authenticationService.dart';
+<<<<<<< HEAD
 import 'package:flare/features/status_detail/presentation/status_detail_page.dart';
+=======
+import 'package:flare/features/user_search/presentation/widgets/user_search.dart';
+>>>>>>> donovan
 import 'package:flutter/material.dart';
 // import 'package:flare/services/auth.dart';
 import 'package:firebase_database/firebase_database.dart';
@@ -20,9 +24,9 @@ class HomePage extends StatefulWidget {
   State<StatefulWidget> createState() => new _HomePageState();
 }
 
-class sensorUI extends StatelessWidget {
+class SensorUI extends StatelessWidget {
   final accelStream;
-  const sensorUI({Key key, this.accelStream}) : super(key: key);
+  SensorUI({Key key, this.accelStream}) : super(key: key);
   @override
   Widget build(BuildContext context) {
     return StreamBuilder(
@@ -92,9 +96,15 @@ class _HomePageState extends State<HomePage> {
     return new Scaffold(
       appBar: new AppBar(
         title: new Text('Flare'),
+<<<<<<< HEAD
         actions: <Widget>[new FlatButton(child: new Text('Logout', style: new TextStyle(fontSize: 17.0, color: Colors.white)), onPressed: signOut)],
       ),
       body: Container(color: Colors.red), //sensorUI(accelStream: widget._accelerometerStream),
+=======
+        actions: <Widget>[UserSearchButton()],
+      ),
+      body: SensorUI(accelStream: widget._accelerometerStream),
+>>>>>>> donovan
     );
   }
 }
