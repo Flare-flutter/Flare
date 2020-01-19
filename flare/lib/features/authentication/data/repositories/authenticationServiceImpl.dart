@@ -1,21 +1,8 @@
 import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flare/features/authentication/domain/repositories/authenticationService.dart';
 
-abstract class BaseAuth {
-  Future<String> signIn(String email, String password);
-
-  Future<String> signUp(String email, String password);
-
-  Future<FirebaseUser> getCurrentUser();
-
-  Future<void> sendEmailVerification();
-
-  Future<void> signOut();
-
-  Future<bool> isEmailVerified();
-}
-
-class Auth implements BaseAuth {
+class AuthServiceImpl implements AuthService<FirebaseUser> {
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
 
   Future<String> signIn(String email, String password) async {
